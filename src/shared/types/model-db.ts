@@ -53,6 +53,7 @@ export const ReasoningSchema = z
       })
       .optional(),
     effort: ReasoningEffortSchema.optional(),
+    effort_options: z.array(ReasoningEffortSchema).optional(),
     verbosity: VerbositySchema.optional()
   })
   .optional()
@@ -510,6 +511,9 @@ function getReasoning(obj: unknown): ProviderModel['reasoning'] {
         }
       : undefined
   const effort = getEffortValue((obj as any)['effort'])
+  const effort_options = getNonEmptyStringArray(obj, 'effort_options')?.filter(
+    (value) => ReasoningEffortSchema.safeParse(value).success
+  ) as ReasoningEffort[] | undefined
   const verbosity = getVerbosityValue((obj as any)['verbosity'])
 
   if (
@@ -517,9 +521,10 @@ function getReasoning(obj: unknown): ProviderModel['reasoning'] {
     defEnabled !== undefined ||
     budget !== undefined ||
     effort !== undefined ||
+    effort_options !== undefined ||
     verbosity !== undefined
   )
-    return { supported, default: defEnabled, budget, effort, verbosity }
+    return { supported, default: defEnabled, budget, effort, effort_options, verbosity }
   return undefined
 }
 
